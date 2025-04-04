@@ -16,6 +16,9 @@ const proxyMiddleware = createProxyMiddleware<Request, Response>({
   secure: false,
   ws: true,
   followRedirects: true,
+  pathRewrite: {
+    '^/proxy/elevenlabs': '',
+  },
   on: {
     proxyReq: (proxyReq: any, req: any, res: any) => {
       proxyReq.setHeader(AUTH_API_HEADER, `${process.env.ELEVENLABS_API_KEY}`);
@@ -69,7 +72,7 @@ const proxyMiddleware = createProxyMiddleware<Request, Response>({
   }
 });
 
-app.use('/v1', proxyMiddleware);
+app.use('/proxy/elevenlabs', proxyMiddleware);
 
 app.get('/api/hello', (req: Request, res: Response) => {
   res.json({ message: 'Hello from TypeScript Express Server!' });
