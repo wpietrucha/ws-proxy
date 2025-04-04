@@ -20,19 +20,16 @@ const proxyMiddleware = createProxyMiddleware<Request, Response>({
     '^/proxy/elevenlabs': '',
   },
   on: {
-    proxyReq: (proxyReq: any, req: any, res: any) => {
+    proxyReq: (proxyReq, req, res) => {
       proxyReq.setHeader(AUTH_API_HEADER, `${process.env.ELEVENLABS_API_KEY}`);
     },
-    proxyRes: (proxyRes: any, req: any, res: any) => {
+    proxyRes: (proxyRes, req, res) => {
       proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     },
-    error: (err: any, req: any, res: any) => {
+    error: (err, req, res) => {
       console.error('Proxy error:', err);
-      if (res.writeHead) {
-        res.status(500).send('Proxy error');
-      }
     },
-    proxyReqWs: (proxyReq: any, req: any, socket: any) => {
+    proxyReqWs: (proxyReq, req, socket) => {
       proxyReq.setHeader(AUTH_API_HEADER, `${process.env.ELEVENLABS_API_KEY}`);
       
       if (req.headers['sec-websocket-protocol']) {
@@ -41,32 +38,28 @@ const proxyMiddleware = createProxyMiddleware<Request, Response>({
       
       console.log('WebSocket request headers:', req.headers);
     },
-    open: (proxySocket: any) => {
+    open: (proxySocket) => {
       console.log('Proxy socket opened');
       
-      proxySocket.on('error', (err: any) => {
+      proxySocket.on('error', (err) => {
         console.error('WebSocket proxy socket error:', err);
       });
     },
-    close: (proxySocket: any) => {
+    close: (proxySocket) => {
       console.log('Proxy socket closed');
       console.log('Socket state:', JSON.stringify({
         destroyed: proxySocket.destroyed,
-        readyState: proxySocket.readyState,
-        connecting: proxySocket.connecting
+        statusCode: proxySocket.statusCode,
+        statusMessage: proxySocket.statusMessage
       }));
     },
-    start: (proxySocket: any, req: any, socket: any) => {
+    start: () => {
       console.log('Proxy socket started');
-      
-      socket.on('error', (err: any) => {
-        console.error('Client socket error:', err);
-      });
     },
-    end: (proxySocket: any, req: any, res: any) => {
+    end: () => {
       console.log('Proxy socket ended');
     },
-    econnreset: (err: any, proxySocket: any, req: any, res: any) => {
+    econnreset: (err) => {
       console.log('Proxy socket econnreset', err);
     }
   }
